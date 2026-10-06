@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/premium_provider.dart';
 
@@ -257,7 +257,7 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: !isAnnual ? Colors.white : Colors.transparent,
+                  color: !isAnnual ? Theme.of(context).cardColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: !isAnnual
                       ? [
@@ -287,7 +287,7 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isAnnual ? Colors.white : Colors.transparent,
+                  color: isAnnual ? Theme.of(context).cardColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: isAnnual
                       ? [
@@ -326,7 +326,7 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor,

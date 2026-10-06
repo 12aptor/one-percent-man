@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -9,6 +9,7 @@ import 'package:one_percent_man/features/premium/presentation/pages/premium_subs
 import 'package:one_percent_man/features/premium/presentation/providers/premium_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/providers/security_provider.dart';
+import '../../../../core/providers/life_mode_provider.dart';
 
 // ─────────────────────────────────────────────
 // Data models (local, static for now)
@@ -61,17 +62,21 @@ class ProfilePage extends ConsumerWidget {
 
   Widget _buildSliverHeader(BuildContext context, bool innerBoxIsScrolled, WidgetRef ref) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 310,
       pinned: true,
       floating: false,
+      elevation: 0,
+      scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      forceElevated: innerBoxIsScrolled,
+      forceElevated: false,
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.pin,
         background: _buildProfileHeader(context, ref),
       ),
       bottom: TabBar(
+        dividerColor: Colors.transparent,
+        dividerHeight: 0,
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
         indicatorColor: Theme.of(context).colorScheme.primary,
@@ -97,16 +102,17 @@ class ProfilePage extends ConsumerWidget {
   Widget _buildProfileHeader(BuildContext context, WidgetRef ref) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, 48),
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Avatar
           Stack(
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: 76,
+                height: 76,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Theme.of(context).colorScheme.primary, const Color(0xFF818CF8)],
@@ -172,6 +178,36 @@ class ProfilePage extends ConsumerWidget {
               color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
+          const SizedBox(height: 10),
+          Consumer(
+            builder: (context, ref, child) {
+              final mode = ref.watch(lifeModeProvider);
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: mode.color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: mode.color.withOpacity(0.35), width: 1.2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(mode.icon, size: 14, color: mode.color),
+                    const SizedBox(width: 8),
+                    Text(
+                      mode.title.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: mode.color,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -205,6 +241,10 @@ class _ProfileTab extends StatelessWidget {
             const _StatCard(label: 'Tareas hoy', value: '4/6', icon: LucideIcons.checkCircle, color: Color(0xFF10B981)),
           ],
         ),
+        const SizedBox(height: 20),
+
+        // Mode of Application: Modo Guerra vs Modo Monje
+        const _LifeModeSelectorCard(),
         const SizedBox(height: 20),
 
         // User info card
@@ -1292,6 +1332,237 @@ void _showDisablePin(BuildContext context, WidgetRef ref) {
     ),
   );
 }
+
+// ─────────────────────────────────────────────
+// Life Mode Selector Card (Modo Guerra / Modo Monje)
+// ─────────────────────────────────────────────
+class _LifeModeSelectorCard extends ConsumerWidget {
+  const _LifeModeSelectorCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeMode = ref.watch(lifeModeProvider);
+
+    return CustomCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: activeMode.color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  activeMode.icon,
+                  size: 18,
+                  color: activeMode.color,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Modo de la Aplicación',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    Text(
+                      'Define tu mentalidad y enfoque actual',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _ModeOptionTile(
+                  mode: AppLifeMode.guerra,
+                  isSelected: activeMode == AppLifeMode.guerra,
+                  onTap: () => _selectMode(context, ref, AppLifeMode.guerra),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ModeOptionTile(
+                  mode: AppLifeMode.monje,
+                  isSelected: activeMode == AppLifeMode.monje,
+                  onTap: () => _selectMode(context, ref, AppLifeMode.monje),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: activeMode.color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: activeMode.color.withOpacity(0.2)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  activeMode == AppLifeMode.guerra ? LucideIcons.flame : LucideIcons.compass,
+                  size: 16,
+                  color: activeMode.color,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    activeMode.description,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectMode(BuildContext context, WidgetRef ref, AppLifeMode mode) {
+    if (ref.read(lifeModeProvider) == mode) return;
+    HapticFeedback.mediumImpact();
+    ref.read(lifeModeProvider.notifier).setMode(mode);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: mode.color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Row(
+          children: [
+            Icon(mode.icon, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '${mode.title} activado',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+class _ModeOptionTile extends StatelessWidget {
+  final AppLifeMode mode;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ModeOptionTile({
+    required this.mode,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isSelected ? mode.color : Theme.of(context).dividerColor;
+    final bgColor = isSelected ? mode.color.withOpacity(0.12) : Theme.of(context).cardColor;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: mode.color.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? mode.color : mode.color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    mode.icon,
+                    size: 18,
+                    color: isSelected ? Colors.white : mode.color,
+                  ),
+                ),
+                if (isSelected)
+                  Icon(LucideIcons.checkCircle2, size: 18, color: mode.color)
+                else
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Theme.of(context).dividerColor, width: 1.5),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              mode.tag,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: mode.color,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              mode.title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.displayLarge?.color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../schedule/presentation/pages/schedule_page.dart';
 import '../../../notes/presentation/pages/notes_page.dart' show TasksPage;

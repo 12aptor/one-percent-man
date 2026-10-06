@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/pin_protection_wrapper.dart';
@@ -222,44 +222,7 @@ class _GoalCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: Dismissible(
-        key: Key(goal.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 25),
-          decoration: BoxDecoration(
-            color: Colors.red.shade400,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: const Icon(LucideIcons.trash2, color: Colors.white, size: 24),
-        ),
-        confirmDismiss: (direction) async {
-          return await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              title: const Text('Eliminar Meta'),
-              content: Text(
-                  '¿Eliminar "${goal.title}"? Esta acción no se puede deshacer.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: FilledButton.styleFrom(
-                      backgroundColor: Colors.red.shade400),
-                  child: const Text('Eliminar'),
-                ),
-              ],
-            ),
-          );
-        },
-        onDismissed: (_) => onDelete(),
-        child: Container(
+      child: Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(22),
@@ -352,6 +315,46 @@ class _GoalCard extends StatelessWidget {
                         ),
                         child: Icon(LucideIcons.pencil,
                             size: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Delete button
+                    GestureDetector(
+                      onTap: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            title: const Text('Eliminar Meta'),
+                            content: Text(
+                                '¿Eliminar "${goal.title}"? Esta acción no se puede deshacer.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancelar'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.red.shade400),
+                                child: const Text('Eliminar'),
+                              ),
+                            ],
+                          ),
+                        ) ?? false;
+                        if (confirm) {
+                          onDelete();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(LucideIcons.trash2,
+                            size: 14, color: Colors.red.shade400),
                       ),
                     ),
                   ],
@@ -493,8 +496,7 @@ class _GoalCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   bool _isDeadlineSoon(DateTime deadline) {

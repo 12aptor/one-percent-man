@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/tasks_notifier.dart';
 import '../../domain/models/task_model.dart';
@@ -624,44 +624,7 @@ class _TaskCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Dismissible(
-        key: Key(task.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
-          decoration: BoxDecoration(
-            color: Colors.red.shade400,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Icon(LucideIcons.trash2, color: Colors.white),
-        ),
-        confirmDismiss: (_) async {
-          return await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              title: const Text('Eliminar tarea'),
-              content: Text(
-                  '¿Eliminar "${task.title}"? Esta acción no se puede deshacer.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: FilledButton.styleFrom(
-                      backgroundColor: Colors.red.shade400),
-                  child: const Text('Eliminar'),
-                ),
-              ],
-            ),
-          ) ?? false;
-        },
-        onDismissed: (_) => onDelete(),
-        child: GestureDetector(
+      child: GestureDetector(
           onTap: onEdit,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
@@ -788,12 +751,54 @@ class _TaskCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                // Delete button
+                GestureDetector(
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        title: const Text('Eliminar tarea'),
+                        content: Text(
+                            '¿Eliminar "${task.title}"? Esta acción no se puede deshacer.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancelar'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            style: FilledButton.styleFrom(
+                                backgroundColor: Colors.red.shade400),
+                            child: const Text('Eliminar'),
+                          ),
+                        ],
+                      ),
+                    ) ?? false;
+                    if (confirm) {
+                      onDelete();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      LucideIcons.trash2,
+                      size: 15,
+                      color: Colors.red.shade400,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -944,7 +949,7 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: Theme.of(context).colorScheme.primary),
+          colorScheme: Theme.of(context).colorScheme,
         ),
         child: child!,
       ),
@@ -958,9 +963,9 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
       initialTime: _selectedTime,
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: Theme.of(context).colorScheme.primary),
+          colorScheme: Theme.of(context).colorScheme,
           timePickerTheme: TimePickerThemeData(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: Theme.of(context).cardColor,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
@@ -1245,12 +1250,12 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: _reminderEnabled
-                  ? Colors.orange.shade50
+                  ? Colors.orange.withOpacity(0.15)
                   : Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: _reminderEnabled
-                    ? Colors.orange.shade200
+                    ? Colors.orange.withOpacity(0.4)
                     : Theme.of(context).dividerColor,
               ),
             ),
@@ -1260,15 +1265,15 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: _reminderEnabled
-                        ? Colors.orange.shade100
-                        : Theme.of(context).dividerColor,
+                        ? Colors.orange.withOpacity(0.25)
+                        : Theme.of(context).dividerColor.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     _reminderEnabled ? LucideIcons.bell : LucideIcons.bellOff,
                     size: 18,
                     color: _reminderEnabled
-                        ? Colors.orange.shade700
+                        ? Colors.orangeAccent
                         : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
                   ),
                 ),
@@ -1283,8 +1288,8 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: _reminderEnabled
-                              ? Colors.orange.shade800
-                              : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                              ? Colors.orangeAccent
+                              : Theme.of(context).textTheme.displayLarge?.color ?? Colors.white,
                         ),
                       ),
                       Text(
@@ -1401,7 +1406,7 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+          color: Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
           letterSpacing: 0.3,
         ),
       );

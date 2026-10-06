@@ -10,12 +10,12 @@ class AppColors {
   static const Color borderLight = Color(0xFFE5E7EB);
 
   // --- DARK MODE ---
-  static const Color backgroundDark = Color(0xFF131417);
-  static const Color surfaceDark = Color(0xFF1D1F24);
+  static const Color backgroundDark = Color(0xFF111215);
+  static const Color surfaceDark = Color(0xFF1C1E24);
   static const Color accentDark = Color(0xFF9E86FF);
-  static const Color textPrimaryDark = Color(0xFFFFFFFF);
-  static const Color textSecondaryDark = Color(0xFF676D75);
-  static const Color borderDark = Color(0xFF2A2D35);
+  static const Color textPrimaryDark = Color(0xFFF9FAFB);
+  static const Color textSecondaryDark = Color(0xFFA1A1AA); // High-contrast zinc-400 for dark mode
+  static const Color borderDark = Color(0xFF2E323B);
 
   // Legacy/Default (to avoid breaking existing code during migration)
   static const Color background = backgroundLight;

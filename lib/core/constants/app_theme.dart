@@ -16,10 +16,16 @@ class AppTheme {
     final Color textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final Color borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
+    final baseTextTheme = ThemeData(brightness: brightness).textTheme;
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: bgColor,
+      cardColor: surfaceColor,
+      canvasColor: surfaceColor,
+      dividerColor: borderColor,
+      dialogBackgroundColor: surfaceColor,
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: accentColor,
@@ -28,20 +34,63 @@ class AppTheme {
         onSecondary: Colors.white,
         error: AppColors.error,
         onError: Colors.white,
-        background: bgColor,
-        onBackground: textPrimary,
         surface: surfaceColor,
         onSurface: textPrimary,
         outline: borderColor,
       ),
-      textTheme: GoogleFonts.interTextTheme().copyWith(
+      appBarTheme: AppBarTheme(
+        backgroundColor: bgColor,
+        foregroundColor: textPrimary,
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: textPrimary),
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: textPrimary,
+        ),
+      ),
+      iconTheme: IconThemeData(
+        color: textPrimary,
+      ),
+      textTheme: GoogleFonts.interTextTheme(baseTextTheme).copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: textPrimary,
         ),
+        displayMedium: GoogleFonts.inter(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: textPrimary,
+        ),
+        displaySmall: GoogleFonts.inter(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: textPrimary,
+        ),
+        headlineMedium: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
+        headlineSmall: GoogleFonts.inter(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
         titleLarge: GoogleFonts.inter(
           fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
+        titleMedium: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
+        titleSmall: GoogleFonts.inter(
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: textPrimary,
         ),
@@ -53,8 +102,27 @@ class AppTheme {
           fontSize: 14,
           color: textSecondary,
         ),
+        bodySmall: GoogleFonts.inter(
+          fontSize: 12,
+          color: textSecondary,
+        ),
+        labelLarge: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
+        labelMedium: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: textSecondary,
+        ),
+        labelSmall: GoogleFonts.inter(
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          color: textSecondary,
+        ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -62,16 +130,51 @@ class AppTheme {
           side: BorderSide(color: borderColor, width: 1),
         ),
       ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
+        modalBackgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: accentColor,
+        unselectedLabelColor: textSecondary,
+        indicatorColor: accentColor,
+        dividerColor: Colors.transparent,
+        dividerHeight: 0,
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: surfaceColor,
         selectedItemColor: accentColor,
-        unselectedItemColor: textSecondary,
+        unselectedItemColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF6B7280),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         selectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
         type: BottomNavigationBarType.fixed,
         elevation: 8,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? const Color(0xFF17191E) : const Color(0xFFF3F4F6),
+        hintStyle: TextStyle(color: textSecondary, fontSize: 14),
+        labelStyle: TextStyle(color: textSecondary, fontSize: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: accentColor, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
@@ -86,4 +189,3 @@ class AppTheme {
     );
   }
 }
-

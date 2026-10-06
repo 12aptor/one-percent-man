@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../providers/activities_provider.dart';
@@ -372,145 +372,148 @@ class _TimelineItem extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12, top: 4),
-              child: Dismissible(
-                key: Key(activity.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade400,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Icon(LucideIcons.trash2, color: Colors.white),
-                ),
-                confirmDismiss: (_) async {
-                  return await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          title: const Text('Eliminar actividad'),
-                          content: Text('¿Eliminar "${activity.title}"?\n\n'
-                              '${activity.recurrence != RecurrenceType.none ? 'Esto eliminará la actividad recurrente por completo.' : 'Esta acción no se puede deshacer.'}'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('Cancelar'),
+              child: GestureDetector(
+                onTap: onTap,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: activity.isCompleted ? 0.6 : 1.0,
+                  child: CustomCard(
+                    color: activity.color,
+                    borderRadius: 16,
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    activity.title,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                      color: Theme.of(context).textTheme.displayLarge?.color ?? Colors.black,
+                                      decoration: activity.isCompleted
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                    ),
+                                  ),
+                                  if (activity.description.isNotEmpty) ...[
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      activity.description,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.red.shade400),
-                              child: const Text('Eliminar'),
+                            const SizedBox(width: 8),
+                            // Delete button
+                            GestureDetector(
+                              onTap: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20)),
+                                    title: const Text('Eliminar actividad'),
+                                    content: Text('¿Eliminar "${activity.title}"?\n\n'
+                                        '${activity.recurrence != RecurrenceType.none ? 'Esto eliminará la actividad recurrente por completo.' : 'Esta acción no se puede deshacer.'}'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx, false),
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () => Navigator.pop(ctx, true),
+                                        style: FilledButton.styleFrom(
+                                            backgroundColor: Colors.red.shade400),
+                                        child: const Text('Eliminar'),
+                                      ),
+                                    ],
+                                  ),
+                                ) ?? false;
+                                if (confirm) {
+                                  ref.read(activitiesProvider.notifier).deleteActivity(activity.id);
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  LucideIcons.trash2,
+                                  size: 15,
+                                  color: Colors.red.shade400,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Checkbox
+                            GestureDetector(
+                              onTap: () => ref
+                                  .read(activitiesProvider.notifier)
+                                  .toggleCompletion(activity.id),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: activity.isCompleted
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.white.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: activity.isCompleted
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                child: activity.isCompleted
+                                    ? const Icon(LucideIcons.check,
+                                        size: 14, color: Colors.white)
+                                    : null,
+                              ),
                             ),
                           ],
                         ),
-                      ) ??
-                      false;
-                },
-                onDismissed: (_) => ref
-                    .read(activitiesProvider.notifier)
-                    .deleteActivity(activity.id),
-                child: GestureDetector(
-                  onTap: onTap,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: activity.isCompleted ? 0.6 : 1.0,
-                    child: CustomCard(
-                      color: activity.color,
-                      borderRadius: 16,
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      activity.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15,
-                                        color: Theme.of(context).textTheme.displayLarge?.color ?? Colors.black,
-                                        decoration: activity.isCompleted
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                      ),
-                                    ),
-                                    if (activity.description.isNotEmpty) ...[
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        activity.description,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                              // Checkbox
-                              GestureDetector(
-                                onTap: () => ref
-                                    .read(activitiesProvider.notifier)
-                                    .toggleCompletion(activity.id),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: activity.isCompleted
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Colors.white.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: activity.isCompleted
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).dividerColor,
-                                    ),
-                                  ),
-                                  child: activity.isCompleted
-                                      ? const Icon(LucideIcons.check,
-                                          size: 14, color: Colors.white)
-                                      : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Meta row
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: [
+                        const SizedBox(height: 8),
+                        // Meta row
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            _MetaChip(
+                              icon: LucideIcons.clock,
+                              label: '${activity.time} – ${activity.endTime}',
+                            ),
+                            _MetaChip(
+                              icon: LucideIcons.timer,
+                              label:
+                                  _formatDuration(activity.durationMinutes),
+                            ),
+                            // Recurrence badge
+                            if (activity.recurrence != RecurrenceType.none)
                               _MetaChip(
-                                icon: LucideIcons.clock,
-                                label: '${activity.time} – ${activity.endTime}',
+                                icon: LucideIcons.repeat,
+                                label: activity.recurrenceLabel,
+                                highlight: true,
                               ),
-                              _MetaChip(
-                                icon: LucideIcons.timer,
-                                label:
-                                    _formatDuration(activity.durationMinutes),
-                              ),
-                              // Recurrence badge
-                              if (activity.recurrence != RecurrenceType.none)
-                                _MetaChip(
-                                  icon: LucideIcons.repeat,
-                                  label: activity.recurrenceLabel,
-                                  highlight: true,
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -674,9 +677,9 @@ class _ActivityFormSheetState extends State<_ActivityFormSheet> {
       initialTime: isStart ? _selectedTime : _selectedEndTime,
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: Theme.of(context).colorScheme.primary),
+          colorScheme: Theme.of(context).colorScheme,
           timePickerTheme: TimePickerThemeData(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: Theme.of(context).cardColor,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
@@ -710,7 +713,7 @@ class _ActivityFormSheetState extends State<_ActivityFormSheet> {
       lastDate: DateTime(2035),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: Theme.of(context).colorScheme.primary),
+          colorScheme: Theme.of(context).colorScheme,
         ),
         child: child!,
       ),
@@ -1029,7 +1032,7 @@ class _ActivityFormSheetState extends State<_ActivityFormSheet> {
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                     elevation: 0,
@@ -1053,7 +1056,7 @@ class _ActivityFormSheetState extends State<_ActivityFormSheet> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+          color: Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
           letterSpacing: 0.3,
         ),
       );
@@ -1129,7 +1132,7 @@ class _RecurrenceSelector extends StatelessWidget {
                 Icon(
                   _recurrenceIcon(r),
                   size: 13,
-                  color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
                 ),
                 const SizedBox(width: 5),
                 Text(
@@ -1137,7 +1140,7 @@ class _RecurrenceSelector extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                    color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -1206,7 +1209,7 @@ class _WeekDayPicker extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: isSel ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                color: isSel ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -1287,7 +1290,7 @@ class _MonthDayPicker extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: isSel ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+                  color: isSel ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).textTheme.titleSmall?.color ?? Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
